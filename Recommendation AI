@@ -1,0 +1,68 @@
+import random
+
+def get_skin_tone_category(color):
+    color = color.lower()
+    if color in ["fair", "light"]:
+        return "fair"
+    elif color in ["medium", "wheatish"]:
+        return "medium"
+    elif color in ["dark", "deep"]:
+        return "dark"
+    else:
+        return "unknown"
+
+def get_recommendations(skin_tone, undertone, preferences, dislikes):
+    shade_database = {
+        "fair": {
+            "cool": ["rose pink", "mauve", "soft berry"],
+            "warm": ["coral", "peach", "warm nude"],
+            "neutral": ["dusty rose", "pink nude", "soft red"]
+        },
+        "medium": {
+            "cool": ["plum", "cranberry", "cool red"],
+            "warm": ["terracotta", "warm coral", "brick red"],
+            "neutral": ["rosewood", "mocha", "berry nude"]
+        },
+        "dark": {
+            "cool": ["deep berry", "wine", "blue-red"],
+            "warm": ["burnt orange", "deep peach", "warm brown"],
+            "neutral": ["chocolate", "auburn", "burgundy"]
+        }
+    }
+
+    skin_tone = get_skin_tone_category(skin_tone)
+    undertone = undertone.lower()
+    preferences = [p.lower().strip() for p in preferences]
+    dislikes = [d.lower().strip() for d in dislikes]
+
+    if skin_tone == "unknown" or undertone not in ["cool", "warm", "neutral"]:
+        return ["Sorry, I couldn't identify your skin tone or undertone. Please try again."]
+
+    possible_shades = shade_database[skin_tone][undertone]
+    filtered = [shade for shade in possible_shades if all(pref in shade for pref in preferences if pref)]
+    final = [shade for shade in filtered if not any(dislike in shade for dislike in dislikes if dislike)]
+
+    if not final:
+        final = [shade for shade in possible_shades if shade not in dislikes]
+
+    return final or ["Sorry, no suitable shades found based on your input."]
+
+if __name__ == "__main__":
+    print("Welcome to LipBot 💄! Let's find your perfect lipstick shade.")
+
+    try:
+        skin_tone = input("What is your skin tone? (Fair, Medium, Dark): ")
+        undertone = input("What is your undertone? (Cool, Warm, Neutral): ")
+        preferences = input("Enter any shade preferences (e.g. red, coral) separated by commas: ").split(",")
+        dislikes = input("Enter any shades you dislike separated by commas: ").split(",")
+    except Exception:
+        print("\nNote: Running in fallback mode with default test values.")
+        skin_tone = "Medium"
+        undertone = "Warm"
+        preferences = ["red", "coral"]
+        dislikes = ["brick"]
+
+    recommended_shades = get_recommendations(skin_tone, undertone, preferences, dislikes)
+    print("\nRecommended shades for you:")
+    for shade in recommended_shades:
+        print(f"- {shade.title()}")
